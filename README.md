@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/skylerhall/nuclear-cmms/actions/workflows/ci.yml/badge.svg)](https://github.com/skylerhall/nuclear-cmms/actions/workflows/ci.yml)
 
+**[Live demo: nuclear-cmms.onrender.com](https://nuclear-cmms.onrender.com)**. Hosted on Render’s free plan, so the first visit can take about a minute to wake it. The demo data resets each time it wakes.
+
 A working computerized maintenance management system (CMMS) for the maintenance and work-control organization of a nuclear power plant. It covers the parts of the job that general-purpose CMMS tools leave to procedures and spreadsheets: Tech Spec LCO clocks, protected trains, surveillance grace periods, QC hold points, Q-level parts and Maintenance Rule (10 CFR 50.65) monitoring.
 
 > **The plant is fictional.** Halcyon Point Generating Station, its equipment tags, parts, people and every number are invented. The rules follow the structure of standard PWR Technical Specifications and common US nuclear maintenance practice, simplified for a demo.
