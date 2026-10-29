@@ -1,0 +1,14 @@
+node_modules
+dist
+data
+.env
+.env.*
+!.env.example
+.git
+.claude
+notes
+coverage
+*.db
+*.db-wal
+*.db-shm
+docs

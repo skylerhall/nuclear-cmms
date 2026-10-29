@@ -1,0 +1,35 @@
+{
+  "name": "halcyon-cmms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Computerized maintenance management system for a nuclear plant: work orders, PM and surveillance scheduling, Tech Spec LCO tracking and Maintenance Rule reliability (portfolio demo, fictional plant).",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "node --watch-path=server --watch-path=shared server/index.ts --dev",
+    "build": "vite build",
+    "start": "node server/index.ts",
+    "test": "node --test --test-concurrency=1 \"tests/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json && tsc -p web/tsconfig.json",
+    "demo:reset": "node scripts/reset-demo.ts"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "lucide-react": "^1.52.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3"
+  }
+}
