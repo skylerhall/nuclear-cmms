@@ -138,7 +138,7 @@ function Shell() {
 
   useEffect(() => setMenuOpen(false), [path]);
 
-  if (boot.error) return <div className="grid min-h-screen place-items-center p-6 text-center text-sm text-red-700">{boot.error}</div>;
+  if (boot.error) return <div className="grid min-h-screen place-items-center p-6 text-center text-sm text-bad">{boot.error}</div>;
   if (!boot.data) return <Splash />;
 
   const actor = boot.data.people.find((p) => p.id === actorId) ?? boot.data.people[0];
@@ -152,87 +152,95 @@ function Shell() {
   };
   const { item, page, title } = route(path);
 
+  const go = (to: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    navigate(to);
+  };
+
   const sidebar = (
-    <div className="flex h-full flex-col px-4 py-6 text-white">
-      <button onClick={() => navigate('/')} className="mb-8 flex items-center gap-3 px-2 text-left">
-        <img src="/favicon.svg" alt="" className="h-10 w-10 rounded-xl ring-1 ring-white/10" />
-        <div>
-          <div className="font-bold leading-tight tracking-tight">{boot.data.plant.shortName}</div>
-          <div className="text-xs text-white/55">CMMS · Maintenance & work control</div>
-        </div>
-      </button>
-      <nav className="scrollbar-thin -mx-1 flex-1 space-y-6 overflow-y-auto px-1">
+    <div className="flex h-full flex-col px-3 py-5 text-ink">
+      <a href="/" onClick={go('/')} aria-label={`${boot.data.plant.shortName} CMMS, overview`} className="mb-7 flex items-center gap-3 rounded-pill px-2 py-1">
+        <img src="/favicon.svg" alt="" width={36} height={36} className="h-9 w-9 rounded-pill" />
+        <span className="min-w-0">
+          <span className="block text-lg leading-tight">{boot.data.plant.shortName}</span>
+          <span className="block text-sm text-muted">Maintenance and work control</span>
+        </span>
+      </a>
+      <nav aria-label="Main" className="scrollbar-thin -mx-1 flex-1 space-y-6 overflow-y-auto px-1">
         {NAV.map((section) => (
           <div key={section.section}>
-            <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[.16em] text-white/40">{section.section}</div>
-            <div className="space-y-0.5">
-              {section.items.map((nav) => (
-                <button
-                  key={nav.path}
-                  onClick={() => navigate(nav.path)}
-                  className={cx(
-                    'relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition',
-                    nav.path === item.path
-                      ? 'bg-white/12 font-medium text-white shadow-sm before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-full before:bg-accent'
-                      : 'text-white/70 hover:bg-white/8 hover:text-white',
-                  )}
-                >
-                  <nav.icon size={17} className={nav.path === item.path ? 'text-accent' : undefined} />
-                  {nav.label}
-                </button>
-              ))}
+            <div className="mb-1.5 px-3 text-sm text-muted">{section.section}</div>
+            <div className="space-y-px">
+              {section.items.map((nav) => {
+                const current = nav.path === item.path;
+                return (
+                  <a
+                    key={nav.path}
+                    href={nav.path}
+                    onClick={go(nav.path)}
+                    aria-current={current ? 'page' : undefined}
+                    className={cx(
+                      'relative flex h-10 items-center gap-3 rounded-pill px-3 text-sm transition-colors duration-150',
+                      current ? 'bg-paper-2 font-medium text-ink before:absolute before:inset-y-2.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent' : 'text-ink-2 hover:bg-paper-2 hover:text-ink',
+                    )}
+                  >
+                    <nav.icon size={16} className={current ? 'text-accent' : 'text-muted'} aria-hidden />
+                    {nav.label}
+                  </a>
+                );
+              })}
             </div>
           </div>
         ))}
       </nav>
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/6 p-4 text-xs leading-5 text-white/60">
-        <div className="mb-1 font-medium text-white">{boot.data.plant.reactorType}</div>
-        Fictional plant. Every tag, part, person and number in this demo is invented.
-      </div>
+      <p className="mt-4 border-t border-rule px-3 pt-4 text-sm leading-6 text-muted">
+        <span className="block text-ink-2">{boot.data.plant.reactorType}</span>
+        Fictional plant. Every tag, part, person and number here is invented.
+      </p>
     </div>
   );
 
   return (
     <AppContext.Provider value={{ ...boot.data, actor, setActor, version, changed: () => setVersion((v) => v + 1) }}>
       <div className="min-h-screen">
-        <aside className="fixed inset-y-0 left-0 z-30 hidden w-68 bg-brand-dark lg:block">{sidebar}</aside>
+        <aside className="fixed inset-y-0 left-0 z-[200] hidden w-68 border-r border-rule bg-paper-3 lg:block">{sidebar}</aside>
         {menuOpen && (
-          <div className="fixed inset-0 z-40 lg:hidden">
-            <div className="absolute inset-0 bg-black/30" onClick={() => setMenuOpen(false)} />
-            <aside className="animate-slide-in absolute inset-y-0 left-0 w-72 bg-brand-dark">{sidebar}</aside>
+          <div className="fixed inset-0 z-[400] lg:hidden">
+            <div className="absolute inset-0 bg-scrim" onClick={() => setMenuOpen(false)} />
+            <aside className="animate-slide-in absolute inset-y-0 left-0 w-72 border-r border-rule-2 bg-paper-3">{sidebar}</aside>
           </div>
         )}
         <div className="lg:pl-68">
-          <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line border-t-[3px] border-t-accent bg-white/90 px-4 backdrop-blur md:px-8">
-            <div className="flex min-w-0 items-center gap-3">
-              <button className="rounded-lg p-2 hover:bg-soft lg:hidden" onClick={() => setMenuOpen((v) => !v)} aria-label="Menu">
+          <header className="sticky top-0 z-[300] flex h-16 items-center justify-between gap-3 border-b border-rule bg-paper px-4 md:px-8">
+            <div className="flex min-w-0 items-center gap-2">
+              <button type="button" className="grid h-10 w-10 place-items-center rounded-pill text-ink-2 hover:bg-paper-2 lg:hidden" onClick={() => setMenuOpen((v) => !v)} aria-label="Menu" aria-expanded={menuOpen}>
                 {menuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
-              <div className="min-w-0">
-                <p className="truncate text-[11px] font-semibold uppercase tracking-[.15em] text-faint">{boot.data.plant.name}</p>
-                <h1 className="truncate text-base font-bold tracking-tight">{title}</h1>
-              </div>
+              <h1 className="max-w-none truncate text-lg">{title}</h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <Button size="sm" variant="primary" icon={Plus} onClick={() => setRequestOpen(true)}>
+              <Button size="md" icon={Plus} onClick={() => setRequestOpen(true)} aria-label="New work request">
                 <span className="hidden sm:inline">Work request</span>
               </Button>
               <ActorSwitcher people={boot.data.people} actor={actor} onChange={setActor} />
               {boot.data.authRequired && (
                 <button
+                  type="button"
                   title="Sign out"
+                  aria-label="Sign out"
                   onClick={async () => {
                     await api('/auth/logout', { body: {} });
                     window.location.reload();
                   }}
-                  className="rounded-lg p-2 text-muted hover:bg-soft"
+                  className="grid h-10 w-10 place-items-center rounded-pill text-muted hover:bg-paper-2 hover:text-ink"
                 >
                   <LogOut size={18} />
                 </button>
               )}
             </div>
           </header>
-          <main className="mx-auto max-w-[1400px] px-4 py-6 md:px-8 md:py-8">
+          <main className="mx-auto max-w-[1400px] px-4 py-6 md:px-8 md:py-10">
             <div key={`${actor.id}:${path}:${version}`}>{page}</div>
           </main>
         </div>
@@ -262,17 +270,17 @@ function ActorSwitcher({ people, actor, onChange }: { people: Person[]; actor: P
   }, [open]);
   return (
     <div ref={ref} className="relative">
-      <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 rounded-xl border border-line bg-white py-1 pl-1 pr-2.5 text-left hover:bg-soft" aria-haspopup="menu" aria-expanded={open}>
+      <button type="button" onClick={() => setOpen((v) => !v)} className="flex h-10 items-center gap-2 rounded-pill border border-rule-2 bg-paper-2 pl-1 pr-2.5 text-left transition-colors duration-150 hover:bg-paper-3" aria-haspopup="menu" aria-expanded={open}>
         <Avatar initials={actor.initials} />
-        <span className="hidden min-w-0 md:block">
-          <span className="block text-[11px] leading-tight text-faint">Acting as</span>
-          <span className="block truncate text-sm font-semibold leading-tight">{actor.name}</span>
+        <span className="hidden min-w-0 items-baseline gap-1.5 text-sm md:flex">
+          <span className="text-muted">Acting as</span>
+          <span className="truncate font-medium text-accent">{actor.name}</span>
         </span>
         <ChevronDown size={14} className="text-muted" />
       </button>
       {open && (
-        <div role="menu" className="animate-rise absolute right-0 top-12 z-40 w-[min(92vw,360px)] rounded-2xl border border-line bg-white p-2 shadow-2xl">
-          <p className="px-3 pb-2 pt-1 text-xs leading-5 text-muted">Every action is role-gated, as at a real plant. Switch people to see what each role can and can't do.</p>
+        <div role="menu" className="animate-rise absolute right-0 top-12 z-[100] w-[min(92vw,380px)] rounded-card border border-rule-2 bg-paper-2 p-2">
+          <p className="px-3 pb-2 pt-1 text-sm leading-6 text-muted">Every action is role-gated, as at a real plant. Switch people to see what each role can and can’t do.</p>
           {people.map((p) => (
             <button
               key={p.id}
@@ -281,14 +289,15 @@ function ActorSwitcher({ people, actor, onChange }: { people: Person[]; actor: P
                 onChange(p.id);
                 setOpen(false);
               }}
-              className={cx('flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left hover:bg-soft', p.id === actor.id && 'bg-brand/6')}
+              type="button"
+              aria-current={p.id === actor.id || undefined}
+              className={cx('flex w-full items-start gap-3 rounded-pill px-3 py-2 text-left transition-colors duration-150 hover:bg-paper-3', p.id === actor.id && 'bg-paper-3')}
             >
               <Avatar initials={p.initials} className="mt-0.5" />
               <span className="min-w-0">
-                <span className="block text-sm font-semibold">
-                  {p.name} <span className="font-normal text-muted">· {p.role === 'technician' ? p.title : ROLE_LABEL[p.role]}</span>
-                </span>
-                <span className="block text-xs text-faint">{ROLE_CAN[p.role]}</span>
+                <span className="block text-sm font-medium text-accent">{p.name}</span>
+                <span className="block text-sm text-ink-2">{p.role === 'technician' ? p.title : ROLE_LABEL[p.role]}</span>
+                <span className="block text-sm text-muted">{ROLE_CAN[p.role]}</span>
               </span>
             </button>
           ))}

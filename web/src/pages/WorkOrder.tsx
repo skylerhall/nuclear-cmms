@@ -22,7 +22,7 @@ import {
 import { useEffect, useState, type ReactNode } from 'react';
 import { DISCIPLINE_LABEL, PRIORITY_LABEL, ROLE_LABEL, STATUS_FLOW, STATUS_LABEL, STEP_KIND_LABEL, TYPE_LABEL, criteriaText, needsValue, stepPhase, stepRoles } from '../../../shared/rules.ts';
 import type { ActionOption, Priority, Role, StepKind, WorkStep } from '../../../shared/types.ts';
-import { DueChip, EquipmentLink, EquipmentState, LcoClock, PriorityBadge, SafetyBadge, Tag, TypeBadge, WoLink, WoStatus } from '../components/domain.tsx';
+import { AppLink, DueChip, EquipmentLink, EquipmentState, LcoClock, PriorityBadge, SafetyBadge, Tag, TypeBadge, WoLink, WoStatus } from '../components/domain.tsx';
 import { Badge, Button, Card, ErrorNote, Field, Modal, Spinner, Toggle, cx, inputClass, useToast } from '../components/ui.tsx';
 import { api } from '../lib/api.ts';
 import { useApp } from '../lib/app-context.ts';
@@ -69,18 +69,18 @@ export function WorkOrderPage({ id }: { id: string }) {
 
   return (
     <div className="space-y-6">
-      <button onClick={() => navigate('/work-orders')} className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink">
-        <ArrowLeft size={15} /> Work orders
-      </button>
+      <AppLink to="/work-orders" className="inline-flex items-center gap-1.5 text-sm text-ink-2 no-underline">
+        <ArrowLeft size={15} aria-hidden /> Work orders
+      </AppLink>
 
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <Tag className="text-base">{wo.number}</Tag>
+          <Tag className="text-lg">{wo.number}</Tag>
           <TypeBadge type={wo.type} />
           <PriorityBadge priority={wo.priority} />
           <WoStatus status={wo.status} />
         </div>
-        <h2 className="text-2xl font-bold tracking-tight md:text-[28px]">{wo.title}</h2>
+        <h2 className="text-2xl font-medium md:text-[28px]">{wo.title}</h2>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <span className="flex items-center gap-2">
             <EquipmentLink id={equipment.id} tag={equipment.tag} /> <span className="text-muted">{equipment.name}</span>
@@ -99,19 +99,19 @@ export function WorkOrderPage({ id }: { id: string }) {
 
       {detail.equipmentOos.map((o) =>
         o.lcoDueAt && techSpec ? (
-          <div key={o.id} className="grid gap-4 rounded-2xl border border-red-200 bg-red-50/60 px-5 py-4 md:grid-cols-[1fr_auto] md:items-center">
+          <div key={o.id} className="grid gap-4 rounded-card border border-bad bg-bad-soft px-5 py-4 md:grid-cols-[1fr_auto] md:items-center">
             <div className="flex items-start gap-3">
-              <ShieldAlert size={18} className="mt-0.5 shrink-0 text-critical" />
+              <ShieldAlert size={18} className="mt-0.5 shrink-0 text-bad" />
               <div>
-                <div className="font-semibold text-red-800">
+                <div className="font-medium text-bad">
                   {o.heldByThis ? `This work holds ${equipment.tag} inoperable` : `${equipment.tag} is inoperable`}: LCO {techSpec.code}
                 </div>
                 {o.holder && (
-                  <div className="text-sm text-red-800/80">
+                  <div className="text-sm text-bad">
                     Restored through <WoLink id={o.holder.id} number={o.holder.number} />. {o.reason}
                   </div>
                 )}
-                <div className="text-sm text-red-800/80">
+                <div className="text-sm text-bad">
                   {techSpec.requiredAction} within {techSpec.completionHours} h. Entered {dateTime(o.startedAt)} by {o.enteredBy}.
                 </div>
               </div>
@@ -119,7 +119,7 @@ export function WorkOrderPage({ id }: { id: string }) {
             <LcoClock hoursRemaining={(Date.parse(o.lcoDueAt) - asOf) / 3_600_000} completionHours={techSpec.completionHours} asOf={asOf} />
           </div>
         ) : (
-          <div key={o.id} className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50/60 px-5 py-3 text-sm text-amber-900">
+          <div key={o.id} className="flex items-center gap-3 rounded-card border border-accent bg-accent-soft px-5 py-3 text-sm text-accent">
             <Lock size={16} /> {o.heldByThis ? 'This work holds' : o.holder ? <>Work order <WoLink id={o.holder.id} number={o.holder.number} /> holds</> : 'Operations holds'} {equipment.tag} out of service since {dateTime(o.startedAt)}. No Tech Spec LCO applies.
           </div>
         ),
@@ -150,23 +150,28 @@ export function WorkOrderPage({ id }: { id: string }) {
 }
 
 function Stepper({ status }: { status: WorkOrderDetail['workOrder']['status'] }) {
-  if (status === 'cancelled') return <div className="rounded-xl border border-line bg-white px-4 py-3 text-sm text-muted">Cancelled</div>;
+  if (status === 'cancelled') return <div className="rounded-card border border-rule bg-paper-2 px-4 py-3 text-sm text-muted">Cancelled</div>;
   const at = STATUS_FLOW.indexOf(status);
   return (
-    <ol className="grid grid-cols-3 gap-2 rounded-2xl border border-line bg-white p-2 md:grid-cols-6">
-      {STATUS_FLOW.map((s, i) => (
-        <li key={s} className={cx('flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium', i === at ? 'bg-brand text-white' : i < at ? 'text-ink' : 'text-faint')}>
-          {i < at || status === 'closed' ? <CheckCircle2 size={15} className={i === at ? 'text-white' : 'text-good'} /> : i === at ? <CircleDashed size={15} /> : <span className="grid h-[15px] w-[15px] place-items-center rounded-full border border-line text-[9px]">{i + 1}</span>}
-          {STATUS_LABEL[s]}
-        </li>
-      ))}
+    <ol aria-label="Work order status" className="grid grid-cols-3 gap-px overflow-hidden rounded-card border border-rule bg-rule md:grid-cols-6">
+      {STATUS_FLOW.map((s, i) => {
+        const done = i < at || status === 'closed';
+        const current = i === at && status !== 'closed';
+        return (
+          <li key={s} aria-current={current ? 'step' : undefined} className={cx('flex items-center gap-2 px-3 py-2.5 text-sm', current ? 'bg-accent-soft font-medium text-accent' : 'bg-paper-2', done ? 'text-ink-2' : !current && 'text-muted')}>
+            {done ? <CheckCircle2 size={15} className="shrink-0 text-ok" aria-hidden /> : current ? <CircleDashed size={15} className="shrink-0" aria-hidden /> : <span className="measured w-[15px] shrink-0 text-center text-sm">{i + 1}</span>}
+            {STATUS_LABEL[s]}
+          </li>
+        );
+      })}
     </ol>
   );
 }
 
 // ── Steps ──────────────────────────────────────────────────────────────────
 
-const KIND_TONE: Record<StepKind, 'gray' | 'blue' | 'purple' | 'amber'> = { step: 'gray', reading: 'blue', qc_hold: 'purple', pmt: 'amber' };
+// A reading and a test are instruments (cool); a QC hold is a person's signature (amber).
+const KIND_TONE: Record<StepKind, 'gray' | 'blue' | 'purple' | 'amber'> = { step: 'gray', reading: 'blue', qc_hold: 'amber', pmt: 'blue' };
 
 function StepsCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mutate }) {
   const { actor } = useApp();
@@ -174,7 +179,7 @@ function StepsCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mutate
   const canEdit = actor.role === 'planner' && wo.status === 'planning';
   const done = detail.steps.filter((s) => s.completedAt && s.result !== 'fail').length;
   return (
-    <Card title="Work instructions" subtitle={`${done} of ${detail.steps.length} signed`} icon={ClipboardCheck} bodyClassName="divide-y divide-line/70">
+    <Card title="Work instructions" subtitle={`${done} of ${detail.steps.length} signed`} icon={ClipboardCheck} bodyClassName="divide-y divide-rule">
       {!detail.steps.length && <div className="px-5 py-6 text-sm text-muted">No steps yet. The planner writes the work instructions during planning.</div>}
       {detail.steps.map((s) => (
         <StepRow key={s.id} step={s} detail={detail} mutate={mutate} canEdit={canEdit} />
@@ -200,25 +205,32 @@ function StepRow({ step, detail, mutate, canEdit }: { step: WorkStep; detail: Wo
     setBusy(false);
   };
   return (
-    <div className={cx('grid gap-3 px-5 py-3.5 md:grid-cols-[2rem_1fr_auto] md:items-start', step.result === 'fail' && 'bg-red-50/50')}>
-      <span className="font-mono text-xs font-semibold text-faint tabular">{String(step.seq).padStart(2, '0')}</span>
+    <div className={cx('grid gap-3 px-5 py-3.5 md:grid-cols-[2rem_1fr_auto] md:items-start', step.result === 'fail' && 'bg-bad-soft')}>
+      <span className="measured text-sm text-muted">{String(step.seq).padStart(2, '0')}</span>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={KIND_TONE[step.kind]}>{STEP_KIND_LABEL[step.kind]}</Badge>
-          {criteria && <span className="text-xs text-muted">Acceptance: {criteria}</span>}
+          {criteria && (
+            <span className="text-sm text-muted">
+              Acceptance <span className="measured text-ink-2">{criteria}</span>
+            </span>
+          )}
         </div>
-        <p className="mt-1 text-sm leading-6">{step.text}</p>
+        <p className="mt-1.5 leading-6">{step.text}</p>
         {step.completedAt && (
-          <div className={cx('mt-1 flex flex-wrap items-center gap-x-2 text-xs', step.result === 'fail' ? 'font-semibold text-red-700' : 'text-muted')}>
-            {step.result === 'fail' ? <XCircle size={13} className="text-critical" /> : <Check size={13} className="text-good" />}
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            {step.result === 'fail' ? <XCircle size={15} className="text-bad" aria-hidden /> : <Check size={15} className="text-ok" aria-hidden />}
             {step.value !== null && (
-              <span className="tabular">
-                {step.value} {step.unit} {step.result === 'fail' ? '· out of tolerance, re-perform after rework ·' : '· sat ·'}
+              <span className={step.result === 'fail' ? 'text-bad' : 'text-ink-2'}>
+                <span className="measured text-ink">
+                  {step.value}
+                  {step.unit ? `\u00a0${step.unit}` : ''}
+                </span>{' '}
+                {step.result === 'fail' ? 'out of tolerance, re-perform after rework' : 'sat'}
               </span>
             )}
-            <span className="font-normal text-muted">
-              {step.completedBy} · {dateTime(step.completedAt)}
-            </span>
+            <span className="text-accent">{step.completedBy}</span>
+            <span className="measured text-cool">{dateTime(step.completedAt)}</span>
           </div>
         )}
       </div>
@@ -229,16 +241,16 @@ function StepRow({ step, detail, mutate, canEdit }: { step: WorkStep; detail: Wo
               {needsValue(step) && (
                 <input inputMode="decimal" className={cx(inputClass, 'h-8 w-28! text-right tabular')} placeholder={step.unit ?? 'value'} value={value} onChange={(e) => setValue(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && value && sign()} aria-label={`Value for step ${step.seq}`} />
               )}
-              <Button size="sm" variant={step.kind === 'qc_hold' ? 'accent' : 'primary'} onClick={sign} loading={busy} disabled={needsValue(step) && !value}>
+              <Button size="sm" onClick={sign} loading={busy} disabled={needsValue(step) && !value}>
                 {step.result === 'fail' ? 'Re-perform' : 'Sign'}
               </Button>
             </>
           ) : (
-            <span className="text-xs text-faint">{stepRoles(step.kind).map((r) => ROLE_LABEL[r]).join(' or ')} signs</span>
+            <span className="text-sm text-muted">{stepRoles(step.kind).map((r) => ROLE_LABEL[r]).join(' or ')} signs</span>
           ))}
-        {!signable && !step.completedAt && wo.status !== 'closed' && wo.status !== 'cancelled' && <span className="text-xs text-faint">{phase === 'testing' ? 'After work complete' : 'When released'}</span>}
+        {!signable && !step.completedAt && wo.status !== 'closed' && wo.status !== 'cancelled' && <span className="text-sm text-muted">{phase === 'testing' ? 'After work complete' : 'When released'}</span>}
         {canEdit && (
-          <button onClick={() => mutate(`/steps/${step.id}`, { method: 'DELETE' }, 'Step removed')} className="rounded-lg p-1.5 text-faint hover:bg-red-50 hover:text-red-700" aria-label="Remove step">
+          <button onClick={() => mutate(`/steps/${step.id}`, { method: 'DELETE' }, 'Step removed')} className="rounded-pill p-1.5 text-muted hover:bg-bad-soft hover:text-bad" aria-label="Remove step">
             <Trash2 size={15} />
           </button>
         )}
@@ -264,7 +276,7 @@ function AddStep({ mutate }: { mutate: Mutate }) {
     }
   };
   return (
-    <div className="space-y-3 bg-soft/40 px-5 py-4">
+    <div className="space-y-3 bg-paper-3 px-5 py-4">
       <div className="flex flex-wrap gap-2">
         <select className={cx(inputClass, 'w-auto!')} value={kind} onChange={(e) => setKind(e.target.value as StepKind)} aria-label="Step type">
           {(Object.keys(STEP_KIND_LABEL) as StepKind[]).map((k) => (
@@ -282,7 +294,7 @@ function AddStep({ mutate }: { mutate: Mutate }) {
           <span className="text-muted">to</span>
           <input className={cx(inputClass, 'h-9 w-24!')} placeholder="max" value={max} onChange={(e) => setMax(e.target.value)} aria-label="Maximum" />
           <input className={cx(inputClass, 'h-9 w-24!')} placeholder="unit" value={unit} onChange={(e) => setUnit(e.target.value)} aria-label="Unit" />
-          <span className="text-xs text-faint">{kind === 'reading' ? 'A reading needs a min, a max, or both.' : 'Optional for a PMT.'}</span>
+          <span className="text-xs text-muted">{kind === 'reading' ? 'A reading needs a min, a max, or both.' : 'Optional for a PMT.'}</span>
         </div>
       )}
       <Button size="sm" icon={Plus} onClick={add} disabled={text.trim().length < 4}>
@@ -302,7 +314,7 @@ function PartsCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mutate
   const canIssue = (actor.role === 'technician' || actor.role === 'supervisor') && (wo.status === 'in_progress' || wo.status === 'testing');
   if (!detail.parts.length && !canPlan) return null;
   return (
-    <Card title="Parts" subtitle={detail.equipment.safetyClass === 'SR' ? 'Safety-related equipment: Q-level parts only' : undefined} icon={Boxes} bodyClassName="divide-y divide-line/70" action={canPlan && <Button size="sm" icon={Plus} onClick={() => setAdding(true)}>Reserve part</Button>}>
+    <Card title="Parts" subtitle={detail.equipment.safetyClass === 'SR' ? 'Safety-related equipment: Q-level parts only' : undefined} icon={Boxes} bodyClassName="divide-y divide-rule" action={canPlan && <Button size="sm" icon={Plus} onClick={() => setAdding(true)}>Reserve part</Button>}>
       {!detail.parts.length && <div className="px-5 py-5 text-sm text-muted">No parts reserved.</div>}
       {detail.parts.map((l) => {
         const outstanding = l.qtyReserved - l.qtyIssued;
@@ -315,7 +327,9 @@ function PartsCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mutate
               </div>
               <div className="truncate text-sm">{l.part.description}</div>
               <div className="text-xs text-muted">
-                Bin {l.part.bin} · {l.part.onHand} on hand · {money(l.part.unitCostCents)} each
+                <span className="measured">{l.part.bin}</span>
+                <span className="ml-3">{l.part.onHand} on hand</span>
+                <span className="ml-3">{money(l.part.unitCostCents)} each</span>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -328,7 +342,7 @@ function PartsCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mutate
                 </Button>
               )}
               {canPlan && l.qtyIssued === 0 && (
-                <button onClick={() => mutate(`/parts/${l.id}`, { method: 'DELETE' }, 'Reservation released')} className="rounded-lg p-1.5 text-faint hover:bg-red-50 hover:text-red-700" aria-label="Remove reservation">
+                <button onClick={() => mutate(`/parts/${l.id}`, { method: 'DELETE' }, 'Reservation released')} className="rounded-pill p-1.5 text-muted hover:bg-bad-soft hover:text-bad" aria-label="Remove reservation">
                   <Trash2 size={15} />
                 </button>
               )}
@@ -418,12 +432,12 @@ function ClearanceCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mu
           )}
         </div>
       }
-      bodyClassName={editing ? 'p-5' : 'divide-y divide-line/70'}
+      bodyClassName={editing ? 'p-5' : 'divide-y divide-rule'}
     >
       {editing ? (
         <div className="space-y-3">
           <textarea className={cx(inputClass, 'h-40 py-2 font-mono text-xs')} value={text} onChange={(e) => setText(e.target.value)} />
-          <p className="text-xs text-faint">One isolation point per line: component | required position</p>
+          <p className="text-xs text-muted">One isolation point per line: component | required position</p>
           <div className="flex gap-2">
             <Button
               size="sm"
@@ -467,20 +481,20 @@ function LaborCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mutate
   const canLog = (actor.role === 'technician' || actor.role === 'supervisor') && (wo.status === 'in_progress' || wo.status === 'testing');
   const total = detail.labor.reduce((s, l) => s + l.hours, 0);
   return (
-    <Card title="Labor" subtitle={`${num(total, 2)} h charged of ${num(wo.estHours, 1)} h estimated${wo.estDoseMrem ? ` · ALARA estimate ${wo.estDoseMrem} mrem` : ''}`} icon={UserRound} bodyClassName="divide-y divide-line/70">
+    <Card title="Labor" subtitle={`${num(total, 2)} h charged of ${num(wo.estHours, 1)} h estimated${wo.estDoseMrem ? ` · ALARA estimate ${wo.estDoseMrem} mrem` : ''}`} icon={UserRound} bodyClassName="divide-y divide-rule">
       {detail.labor.map((l) => (
         <div key={l.id} className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm">
           <span>
             {l.personName} <span className="text-muted">{l.note && `· ${l.note}`}</span>
           </span>
           <span className="text-muted tabular">
-            {shortDate(l.workedOn)} · <span className="font-semibold text-ink">{l.hours} h</span>
+            {shortDate(l.workedOn)} · <span className="font-medium text-ink">{l.hours} h</span>
           </span>
         </div>
       ))}
       {!detail.labor.length && !canLog && <div className="px-5 py-5 text-sm text-muted">No labor charged yet.</div>}
       {canLog && (
-        <div className="flex flex-wrap items-center gap-2 bg-soft/40 px-5 py-3">
+        <div className="flex flex-wrap items-center gap-2 bg-paper-3 px-5 py-3">
           <input className={cx(inputClass, 'h-9 w-24!')} inputMode="decimal" placeholder="Hours" value={hours} onChange={(e) => setHours(e.target.value)} aria-label="Hours" />
           <input className={cx(inputClass, 'h-9 min-w-48 flex-1')} placeholder="Note (optional)" value={note} onChange={(e) => setNote(e.target.value)} />
           <Button
@@ -503,16 +517,21 @@ function LaborCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mutate
 }
 
 function HistoryCard({ detail }: { detail: WorkOrderDetail }) {
+  const strip = (text: string) => text.replace(`${detail.workOrder.number}: `, '').replace(`${detail.workOrder.number} `, '');
   return (
-    <Card title="History" subtitle="Every change, who made it and when" icon={History} bodyClassName="divide-y divide-line/70">
-      {detail.history.map((h) => (
-        <div key={h.id} className="flex items-start justify-between gap-4 px-5 py-2.5 text-sm">
-          <span className={cx(h.action === 'wo.step_fail' && 'font-medium text-red-700')}>
-            <span className="font-medium">{h.actorName}</span> <span className="text-muted">· {h.summary.replace(`${detail.workOrder.number}: `, '').replace(`${detail.workOrder.number} `, '')}</span>
-          </span>
-          <span className="shrink-0 text-xs text-faint tabular">{dateTime(h.at)}</span>
-        </div>
-      ))}
+    <Card title="History" subtitle="Every change, who made it and when" icon={History} bodyClassName="px-5 py-4">
+      <ol className="border-l border-rule-2">
+        {detail.history.map((h) => (
+          <li key={h.id} className="relative grid gap-x-4 gap-y-0.5 py-2.5 pl-5 sm:grid-cols-[minmax(0,1fr)_auto]">
+            <span className={cx('min-w-0 text-sm', h.action === 'wo.step_fail' ? 'text-bad' : 'text-ink')}>
+              <span className="font-medium text-accent">{h.actorName}</span> {strip(h.summary)}
+            </span>
+            <time dateTime={h.at} className="measured whitespace-nowrap text-sm text-cool">
+              {dateTime(h.at)}
+            </time>
+          </li>
+        ))}
+      </ol>
     </Card>
   );
 }
@@ -538,9 +557,9 @@ function ActionsCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Muta
   const switchTo = (roles: Role[]) => {
     const p = people.find((x) => roles.includes(x.role) && (x.role !== 'technician' || x.discipline === detail.workOrder.discipline)) ?? people.find((x) => roles.includes(x.role));
     return p ? (
-      <button className="font-semibold text-brand hover:underline" onClick={() => setActor(p.id)}>
+      <Button size="sm" variant="ghost" className="mt-1 -ml-2" onClick={() => setActor(p.id)}>
         Act as {p.name}
-      </button>
+      </Button>
     ) : null;
   };
 
@@ -557,14 +576,14 @@ function ActionsCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Muta
           const blocked = a.gates.some((g) => !g.ok);
           return (
             <div key={a.action}>
-              <div className="mb-2 text-sm font-semibold">{a.label}</div>
+              <div className="mb-2 text-sm font-medium">{a.label}</div>
               {a.gates.length > 0 && (
                 <ul className="mb-3 space-y-1.5">
                   {a.gates.map((g, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
-                      {g.ok ? <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-good" /> : <OctagonX size={15} className="mt-0.5 shrink-0 text-critical" />}
+                      {g.ok ? <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-ok" /> : <OctagonX size={15} className="mt-0.5 shrink-0 text-bad" />}
                       <span>
-                        <span className={g.ok ? '' : 'font-medium text-red-800'}>{g.label}</span>
+                        <span className={g.ok ? '' : 'font-medium text-bad'}>{g.label}</span>
                         {g.detail && <span className="block text-xs text-muted">{g.detail}</span>}
                       </span>
                     </li>
@@ -588,7 +607,7 @@ function ActionsCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Muta
           </Button>
         ))}
         {cancel && (
-          <div className="border-t border-line pt-4">
+          <div className="border-t border-rule pt-4">
             {!cancelling ? (
               <Button size="sm" variant="danger" onClick={() => setCancelling(true)} disabled={!cancel.allowedForActor || cancel.gates.some((g) => !g.ok)}>
                 Cancel work order
@@ -641,7 +660,7 @@ function PlanningCard({ detail, mutate }: { detail: WorkOrderDetail; mutate: Mut
   const flag = (key: 'requiresOos' | 'radArea' | 'fme' | 'confinedSpace', label: string) =>
     row(label, planner ? <Toggle small checked={wo[key]} onChange={(v) => patch({ [key]: v })} label={label} /> : wo[key] ? 'Yes' : 'No');
   return (
-    <Card title="Planning" bodyClassName="divide-y divide-line/70 px-5 py-2">
+    <Card title="Planning" bodyClassName="divide-y divide-rule px-5 py-2">
       {row('Discipline', DISCIPLINE_LABEL[wo.discipline])}
       {row('Type', TYPE_LABEL[wo.type])}
       {row(
@@ -690,8 +709,8 @@ function MaintenanceRuleCard({ detail, mutate }: { detail: WorkOrderDetail; muta
         <p className="text-sm text-muted">Not evaluated. {detail.equipment.safetyClass !== 'NSR' ? 'Required before close.' : ''}</p>
       ) : (
         <div className="space-y-1 text-sm">
-          <div className="flex items-center gap-2 font-semibold">
-            {wo.functionalFailure ? <OctagonX size={15} className="text-critical" /> : <CheckCircle2 size={15} className="text-good" />}
+          <div className="flex items-center gap-2 font-medium">
+            {wo.functionalFailure ? <OctagonX size={15} className="text-bad" /> : <CheckCircle2 size={15} className="text-ok" />}
             {wo.functionalFailure ? 'Functional failure' : 'Not a functional failure'}
           </div>
           <p className="text-muted">{wo.mrNote}</p>
@@ -722,8 +741,8 @@ function MaintenanceRuleCard({ detail, mutate }: { detail: WorkOrderDetail; muta
               { v: true, title: 'Functional failure', text: 'The component could not perform its Maintenance Rule function.' },
               { v: false, title: 'Not a functional failure', text: 'Degraded, but the function was never lost.' },
             ].map((o) => (
-              <button key={String(o.v)} onClick={() => setFf(o.v)} className={cx('rounded-xl border p-3 text-left', ff === o.v ? 'border-brand bg-brand/6' : 'border-line hover:bg-soft')}>
-                <div className="text-sm font-semibold">{o.title}</div>
+              <button key={String(o.v)} onClick={() => setFf(o.v)} className={cx('rounded-card border p-3 text-left', ff === o.v ? 'border-accent bg-paper-3' : 'border-rule hover:bg-paper-3')}>
+                <div className="text-sm font-medium">{o.title}</div>
                 <div className="text-xs text-muted">{o.text}</div>
               </button>
             ))}
@@ -742,7 +761,7 @@ function RelatedCard({ detail }: { detail: WorkOrderDetail }) {
   return (
     <Card title="Related" bodyClassName="space-y-4 p-5 text-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-wide text-faint">Equipment</div>
+        <div className="text-xs font-medium text-muted">Equipment</div>
         <div className="mt-1">
           <EquipmentLink id={equipment.id} tag={equipment.tag} />
         </div>
@@ -755,7 +774,7 @@ function RelatedCard({ detail }: { detail: WorkOrderDetail }) {
       </div>
       {plan && (
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-faint">{plan.type === 'ST' ? 'Surveillance' : 'PM'} plan</div>
+          <div className="text-xs font-medium text-muted">{plan.type === 'ST' ? 'Surveillance' : 'PM'} plan</div>
           <div className="mt-1">{plan.title}</div>
           {plan.srRef && <div className="text-muted">{plan.srRef}</div>}
           <div className="mt-1">
@@ -765,7 +784,7 @@ function RelatedCard({ detail }: { detail: WorkOrderDetail }) {
       )}
       {parent && (
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-faint">Raised from</div>
+          <div className="text-xs font-medium text-muted">Raised from</div>
           <div className="mt-1 flex items-center gap-2">
             <WoLink id={parent.id} number={parent.number} /> <WoStatus status={parent.status} />
           </div>
@@ -774,7 +793,7 @@ function RelatedCard({ detail }: { detail: WorkOrderDetail }) {
       )}
       {children.length > 0 && (
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-faint">Follow-up work</div>
+          <div className="text-xs font-medium text-muted">Follow-up work</div>
           {children.map((c) => (
             <div key={c.id} className="mt-1">
               <div className="flex items-center gap-2">

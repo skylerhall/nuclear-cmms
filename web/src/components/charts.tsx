@@ -18,7 +18,7 @@ function useWidth(ref: RefObject<HTMLDivElement | null>, fallback: number): numb
 
 function Tip({ x, y, children }: { x: number; y: number; children: ReactNode }) {
   return (
-    <div className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-white px-2.5 py-1.5 text-xs shadow-lg" style={{ left: x, top: y - 8 }}>
+    <div className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-pill border border-rule bg-paper-2 px-2.5 py-1.5 text-xs" style={{ left: x, top: y - 8 }}>
       {children}
     </div>
   );
@@ -33,15 +33,15 @@ export function BarList({ rows, unit, max: maxIn }: { rows: { label: ReactNode; 
         <div key={i} className="group" title={r.note}>
           <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
             <span className="text-ink">{r.label}</span>
-            <span className="tabular font-semibold">
+            <span className="tabular font-medium">
               {r.value}
               {unit && <span className="ml-1 text-xs font-normal text-muted">{unit}</span>}
             </span>
           </div>
-          <div className="h-3 rounded-r bg-soft/60">
-            <div className="h-3 rounded-r-[4px] bg-series transition group-hover:brightness-110" style={{ width: `${(r.value / max) * 100}%`, minWidth: r.value ? 4 : 0 }} />
+          <div className="h-3 rounded-r bg-paper-3">
+            <div className="h-3 rounded-r-[4px] bg-cool transition group-hover:brightness-110" style={{ width: `${(r.value / max) * 100}%`, minWidth: r.value ? 4 : 0 }} />
           </div>
-          {r.note && <div className="mt-1 text-xs text-faint">{r.note}</div>}
+          {r.note && <div className="mt-1 text-xs text-muted">{r.note}</div>}
         </div>
       ))}
     </div>
@@ -70,12 +70,12 @@ export function Columns({ points, height = 160, valueLabel }: { points: { label:
   const barW = Math.min(24, band * 0.55);
   const y = (v: number) => 8 + plotH - (v / top) * plotH;
   return (
-    <div ref={ref} className="relative">
-      <svg width={W} height={H} className="block" role="img" aria-label={`${valueLabel} by week`}>
+    <div ref={ref} className="relative w-full min-w-0">
+      <svg width={W} height={H} className="block max-w-full" role="img" aria-label={`${valueLabel} by week`}>
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={padL} x2={W} y1={y(t)} y2={y(t)} stroke="var(--color-grid)" strokeWidth={1} />
-            <text x={padL - 6} y={y(t) + 4} textAnchor="end" className="fill-faint text-[11px] tabular">
+            <line x1={padL} x2={W} y1={y(t)} y2={y(t)} stroke="var(--color-rule)" strokeWidth={1} />
+            <text x={padL - 6} y={y(t) + 4} textAnchor="end" className="measured fill-muted text-[12px]">
               {t}
             </text>
           </g>
@@ -92,27 +92,27 @@ export function Columns({ points, height = 160, valueLabel }: { points: { label:
               {h > 0 && (
                 <path
                   d={`M${x0},${y(0)} V${yTop + r} Q${x0},${yTop} ${x0 + r},${yTop} H${x0 + barW - r} Q${x0 + barW},${yTop} ${x0 + barW},${yTop + r} V${y(0)} Z`}
-                  fill="var(--color-series)"
+                  fill="var(--color-cool)"
                   opacity={hover === null || hover === i ? 1 : 0.55}
                 />
               )}
               {(i % 3 === 2 || i === points.length - 1) && (
-                <text x={i === points.length - 1 ? cx0 + band / 2 : cx0} y={H - 6} textAnchor={i === points.length - 1 ? 'end' : 'middle'} className="fill-faint text-[11px]">
+                <text x={i === points.length - 1 ? cx0 + band / 2 : cx0} y={H - 6} textAnchor={i === points.length - 1 ? 'end' : 'middle'} className="fill-muted text-[12px]">
                   {p.label}
                 </text>
               )}
             </g>
           );
         })}
-        <line x1={padL} x2={W} y1={y(0)} y2={y(0)} stroke="var(--color-axis)" strokeWidth={1} />
+        <line x1={padL} x2={W} y1={y(0)} y2={y(0)} stroke="var(--color-rule-2)" strokeWidth={1} />
         {/* Direct label on the latest week only. */}
-        <text x={padL + band * (points.length - 0.5)} y={y(points.at(-1)!.value) - 6} textAnchor="middle" className="fill-ink text-[11px] font-semibold">
+        <text x={padL + band * (points.length - 0.5)} y={y(points.at(-1)!.value) - 6} textAnchor="middle" className="fill-ink text-[12px] font-medium">
           {points.at(-1)!.value}
         </text>
       </svg>
       {hover !== null && (
         <Tip x={padL + band * hover + band / 2} y={y(points[hover].value)}>
-          <div className="font-semibold">Week of {points[hover].label}</div>
+          <div className="font-medium">Week of {points[hover].label}</div>
           <div className="text-muted">
             {points[hover].value} {valueLabel}
             {points[hover].detail ? ` · ${points[hover].detail}` : ''}
@@ -157,44 +157,44 @@ export function TrendChart({ points, unit, min, max, height = 180 }: { points: {
   };
   const limitLine = (v: number, label: string) => (
     <g>
-      <line x1={padL} x2={W - padR} y1={y(v)} y2={y(v)} stroke="var(--color-critical)" strokeWidth={1.5} />
-      <text x={W - padR + 6} y={y(v) + 4} className="fill-red-700 text-[11px] font-semibold">
+      <line x1={padL} x2={W - padR} y1={y(v)} y2={y(v)} stroke="var(--color-bad)" strokeWidth={1.5} />
+      <text x={W - padR + 6} y={y(v) + 4} className="fill-bad text-[12px] font-medium">
         {label} {fmt(v)}
       </text>
     </g>
   );
   return (
-    <div ref={ref} className="relative">
-      <svg width={W} height={H} className="block" onMouseMove={onMove} onMouseLeave={() => setHover(null)} role="img" aria-label="Reading trend">
+    <div ref={ref} className="relative w-full min-w-0">
+      <svg width={W} height={H} className="block max-w-full" onMouseMove={onMove} onMouseLeave={() => setHover(null)} role="img" aria-label="Reading trend">
         {ticks.map((t, i) => (
           <g key={i}>
-            <line x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} stroke="var(--color-grid)" strokeWidth={1} />
-            <text x={padL - 6} y={y(t) + 4} textAnchor="end" className="fill-faint text-[11px] tabular">
+            <line x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} stroke="var(--color-rule)" strokeWidth={1} />
+            <text x={padL - 6} y={y(t) + 4} textAnchor="end" className="measured fill-muted text-[12px]">
               {fmt(t)}
             </text>
           </g>
         ))}
         {max !== null && limitLine(max, 'Max')}
         {min !== null && limitLine(min, 'Min')}
-        <path d={d} fill="none" stroke="var(--color-series)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-        {hover !== null && <line x1={x(hover)} x2={x(hover)} y1={padT} y2={H - padB} stroke="var(--color-axis)" strokeWidth={1} />}
+        <path d={d} fill="none" stroke="var(--color-cool)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        {hover !== null && <line x1={x(hover)} x2={x(hover)} y1={padT} y2={H - padB} stroke="var(--color-rule-2)" strokeWidth={1} />}
         {points.map((p, i) => {
           const out = (max !== null && p.value > max) || (min !== null && p.value < min);
-          return (i === last || hover === i || out) && <circle key={i} cx={x(i)} cy={y(p.value)} r={out ? 5 : 4} fill={out ? 'var(--color-critical)' : 'var(--color-series)'} stroke="white" strokeWidth={2} />;
+          return (i === last || hover === i || out) && <circle key={i} cx={x(i)} cy={y(p.value)} r={out ? 5 : 4} fill={out ? 'var(--color-bad)' : 'var(--color-cool)'} stroke="var(--color-paper-2)" strokeWidth={2} />;
         })}
-        <text x={x(last) + 8} y={y(points[last].value) - 8} className="fill-ink text-[11px] font-semibold">
+        <text x={x(last) + 8} y={y(points[last].value) - 8} className="fill-ink text-[12px] font-medium">
           {fmt(points[last].value)}
         </text>
-        <text x={padL} y={H - 6} className="fill-faint text-[11px]">
+        <text x={padL} y={H - 6} className="fill-muted text-[12px]">
           {points[0].label}
         </text>
-        <text x={W - padR} y={H - 6} textAnchor="end" className="fill-faint text-[11px]">
+        <text x={W - padR} y={H - 6} textAnchor="end" className="fill-muted text-[12px]">
           {points[last].label}
         </text>
       </svg>
       {hover !== null && (
         <Tip x={x(hover)} y={y(points[hover].value)}>
-          <div className="font-semibold tabular">
+          <div className="font-medium tabular">
             {fmt(points[hover].value)} {unit}
           </div>
           <div className="text-muted">
@@ -210,13 +210,13 @@ export function TrendChart({ points, unit, min, max, height = 180 }: { points: {
 /** Used-versus-limit meter. The fill carries severity; the label says it in words. */
 export function LimitMeter({ value, limit, label }: { value: number; limit: number; label: string }) {
   const ratio = value / limit;
-  const fill = ratio > 1 ? 'bg-critical' : ratio >= 0.75 ? 'bg-warning' : 'bg-series';
-  const track = ratio > 1 ? 'bg-red-100' : ratio >= 0.75 ? 'bg-amber-100' : 'bg-series-soft';
+  const fill = ratio > 1 ? 'bg-bad' : ratio >= 0.75 ? 'bg-accent' : 'bg-cool';
+  const track = ratio > 1 ? 'bg-bad-soft' : ratio >= 0.75 ? 'bg-accent-soft' : 'bg-cool-soft';
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
         <span className="text-muted">{label}</span>
-        <span className={cx('tabular font-semibold', ratio > 1 ? 'text-red-700' : 'text-ink')}>
+        <span className={cx('tabular font-medium', ratio > 1 ? 'text-bad' : 'text-ink')}>
           {value} / {limit}
         </span>
       </div>

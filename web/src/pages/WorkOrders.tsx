@@ -2,7 +2,7 @@ import { ClipboardList, Columns3, List, Search, ShieldCheck } from 'lucide-react
 import { useMemo, useState } from 'react';
 import { DISCIPLINE_LABEL, OPEN_STATUSES, STATUS_LABEL, TYPE_LABEL } from '../../../shared/rules.ts';
 import type { Discipline, WorkType } from '../../../shared/types.ts';
-import { PriorityBadge, Tag, TypeBadge, WoStatus } from '../components/domain.tsx';
+import { PriorityBadge, Tag, TypeBadge, WoLink, WoStatus } from '../components/domain.tsx';
 import { Card, EmptyState, ErrorNote, PageHeader, Segmented, Spinner, cx, inputClass } from '../components/ui.tsx';
 import { useApi } from '../lib/api.ts';
 import { shortDate, timeAgo } from '../lib/format.ts';
@@ -68,7 +68,7 @@ export function WorkOrdersPage() {
           ))}
         </select>
         <div className="relative min-w-56 flex-1">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input className={cx(inputClass, 'pl-9')} placeholder="Search number, title or tag" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
@@ -83,9 +83,9 @@ function Table({ rows, total }: { rows: WorkOrderRow[]; total: number }) {
   if (!rows.length) return <Card><EmptyState icon={ClipboardList} title="No work orders match" /></Card>;
   return (
     <Card bodyClassName="overflow-x-auto">
-      <table className="w-full min-w-[920px] text-sm">
+      <table className="table-pin w-full min-w-[920px] text-sm">
         <thead>
-          <tr className="border-b border-line text-left text-xs font-semibold uppercase tracking-wide text-faint">
+          <tr className="border-b border-rule text-left text-xs font-medium text-muted">
             <th className="px-5 py-3">Work order</th>
             <th className="px-3 py-3">Equipment</th>
             <th className="px-3 py-3">Type</th>
@@ -97,15 +97,15 @@ function Table({ rows, total }: { rows: WorkOrderRow[]; total: number }) {
         </thead>
         <tbody>
           {rows.map((w) => (
-            <tr key={w.id} onClick={() => navigate(`/work-orders/${w.id}`)} className="cursor-pointer border-b border-line/60 last:border-0 hover:bg-soft/50">
+            <tr key={w.id} onClick={() => navigate(`/work-orders/${w.id}`)} className="cursor-pointer border-b border-rule last:border-0 hover:bg-paper-3">
               <td className="max-w-xs px-5 py-3">
-                <Tag className="text-brand">{w.number}</Tag>
+                <WoLink id={w.id} number={w.number} />
                 <div className="truncate">{w.title}</div>
               </td>
               <td className="px-3 py-3">
                 <div className="flex items-center gap-1.5">
                   <Tag>{w.tag}</Tag>
-                  {w.safetyClass === 'SR' && <ShieldCheck size={13} className="text-violet-600" aria-label="Safety-related" />}
+                  {w.safetyClass === 'SR' && <ShieldCheck size={13} className="text-muted" aria-label="Safety-related" />}
                 </div>
                 <div className="truncate text-xs text-muted">{w.equipmentName}</div>
               </td>
@@ -126,7 +126,7 @@ function Table({ rows, total }: { rows: WorkOrderRow[]; total: number }) {
           ))}
         </tbody>
       </table>
-      {total > rows.length && <div className="border-t border-line px-5 py-3 text-xs text-muted">Showing {rows.length} of {total}. Narrow the filters to see more.</div>}
+      {total > rows.length && <div className="border-t border-rule px-5 py-3 text-xs text-muted">Showing {rows.length} of {total}. Narrow the filters to see more.</div>}
     </Card>
   );
 }
@@ -139,14 +139,14 @@ function Board({ rows }: { rows: WorkOrderRow[] }) {
         return (
           <div key={s} className="w-72 shrink-0">
             <div className="mb-2 flex items-center justify-between px-1">
-              <span className="text-sm font-semibold">{STATUS_LABEL[s]}</span>
-              <span className="rounded-full bg-white px-2 text-xs font-semibold text-muted ring-1 ring-line">{col.length}</span>
+              <span className="text-sm font-medium">{STATUS_LABEL[s]}</span>
+              <span className="rounded-full bg-paper-2 px-2 text-xs font-medium text-muted ring-1 ring-rule">{col.length}</span>
             </div>
             <div className="space-y-2">
               {col.map((w) => (
-                <button key={w.id} onClick={() => navigate(`/work-orders/${w.id}`)} className="block w-full rounded-xl border border-line bg-white p-3 text-left shadow-sm transition hover:border-brand/40">
+                <article key={w.id} className="rounded-card border border-rule bg-paper-2 p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <Tag className="text-brand">{w.number}</Tag>
+                    <WoLink id={w.id} number={w.number} />
                     <PriorityBadge priority={w.priority} short />
                   </div>
                   <div className="mt-1 line-clamp-2 text-sm">{w.title}</div>
@@ -154,7 +154,7 @@ function Board({ rows }: { rows: WorkOrderRow[] }) {
                     <Tag className="text-muted">{w.tag}</Tag>
                     <TypeBadge type={w.type} />
                   </div>
-                </button>
+                </article>
               ))}
             </div>
           </div>

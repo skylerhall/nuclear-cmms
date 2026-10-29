@@ -2,7 +2,7 @@ import { CalendarClock, Play } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { TYPE_LABEL, intervalText } from '../../../shared/rules.ts';
 import { DueChip, EquipmentLink, TypeBadge, WoLink, WoStatus } from '../components/domain.tsx';
-import { Button, Card, EmptyState, ErrorNote, PageHeader, Segmented, Spinner, Stat, useToast } from '../components/ui.tsx';
+import { Button, Card, EmptyState, ErrorNote, PageHeader, Segmented, Spinner, Stat, StatGrid, useToast } from '../components/ui.tsx';
 import { api, useApi } from '../lib/api.ts';
 import { useApp } from '../lib/app-context.ts';
 import { num, shortDate } from '../lib/format.ts';
@@ -47,12 +47,12 @@ export function SchedulePage() {
         <Spinner />
       ) : (
         <>
-          <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <Stat label="Active plans" value={data.length} note={`${st.length} Tech Spec surveillances`} icon={CalendarClock} />
-            <Stat label="Due within lead time" value={data.filter((r) => r.due.state === 'due_soon').length} tone="blue" />
-            <Stat label="In grace period" value={data.filter((r) => r.due.state === 'in_grace').length} note="Past due, before the late date" tone="amber" />
-            <Stat label="Overdue" value={data.filter((r) => r.due.state === 'overdue').length} note={`${st.filter((r) => r.due.state === 'overdue').length} missed surveillances`} tone="red" />
-          </div>
+          <StatGrid className="mb-8 grid-cols-2 lg:grid-cols-4">
+            <Stat label="Active plans" value={data.length} note={`${st.length} Tech Spec surveillances`} />
+            <Stat label="Due within lead time" value={data.filter((r) => r.due.state === 'due_soon').length} />
+            <Stat label="In grace period" value={data.filter((r) => r.due.state === 'in_grace').length} note="Past due, before the late date" tone="accent" />
+            <Stat label="Overdue" value={data.filter((r) => r.due.state === 'overdue').length} note={`${st.filter((r) => r.due.state === 'overdue').length} missed surveillances`} tone="bad" />
+          </StatGrid>
           <div className="mb-4 flex flex-wrap gap-2">
             <Segmented value={scope} onChange={setScope} options={[{ value: 'attention', label: 'Needs attention' }, { value: 'all', label: 'All plans' }]} />
             <Segmented value={type} onChange={setType} options={[{ value: 'all', label: 'All' }, ...(['ST', 'PM', 'PDM'] as const).map((t) => ({ value: t, label: TYPE_LABEL[t] }))]} />
@@ -61,9 +61,9 @@ export function SchedulePage() {
             {!rows.length ? (
               <EmptyState icon={CalendarClock} title="Nothing needs attention" text="Every plan is outside its lead window." />
             ) : (
-              <table className="w-full min-w-[980px] text-sm">
+              <table className="table-pin w-full min-w-[980px] text-sm">
                 <thead>
-                  <tr className="border-b border-line text-left text-xs font-semibold uppercase tracking-wide text-faint">
+                  <tr className="border-b border-rule text-left text-xs font-medium text-muted">
                     <th className="px-5 py-3">Plan</th>
                     <th className="px-3 py-3">Equipment</th>
                     <th className="px-3 py-3">Interval</th>
@@ -75,7 +75,7 @@ export function SchedulePage() {
                 </thead>
                 <tbody>
                   {rows.map((r) => (
-                    <tr key={r.plan.id} className="border-b border-line/60 last:border-0">
+                    <tr key={r.plan.id} className="border-b border-rule last:border-0">
                       <td className="max-w-sm px-5 py-3">
                         <div className="flex items-center gap-2">
                           <TypeBadge type={r.plan.type} />
@@ -98,7 +98,7 @@ export function SchedulePage() {
                             <WoLink id={r.openWorkOrder.id} number={r.openWorkOrder.number} /> <WoStatus status={r.openWorkOrder.status} />
                           </span>
                         ) : (
-                          <span className="text-xs text-faint">{r.due.state === 'ok' ? 'Not yet generated' : 'Run the generator'}</span>
+                          <span className="text-xs text-muted">{r.due.state === 'ok' ? 'Not yet generated' : 'Run the generator'}</span>
                         )}
                       </td>
                     </tr>

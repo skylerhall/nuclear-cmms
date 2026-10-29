@@ -1,7 +1,7 @@
 import { AlertTriangle, Boxes, PackagePlus, Search, Star } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { WoLink } from '../components/domain.tsx';
-import { Badge, Button, Card, ErrorNote, Field, Modal, PageHeader, Segmented, Spinner, Stat, cx, inputClass, useToast } from '../components/ui.tsx';
+import { Badge, Button, Card, ErrorNote, Field, Modal, PageHeader, Segmented, Spinner, Stat, StatGrid, cx, inputClass, useToast } from '../components/ui.tsx';
 import { api, useApi } from '../lib/api.ts';
 import { useApp } from '../lib/app-context.ts';
 import { money } from '../lib/format.ts';
@@ -41,23 +41,23 @@ export function PartsPage() {
         <Spinner />
       ) : (
         <>
-          <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <Stat label="Stock items" value={data.length} note={`${data.filter((p) => p.quality === 'Q').length} Q-level`} icon={Boxes} />
-            <Stat label="Below reorder point" value={data.filter((p) => p.belowReorder).length} note="Available = on hand − reserved" tone="amber" icon={AlertTriangle} />
-            <Stat label="Critical spares low" value={data.filter((p) => p.belowReorder && p.criticalSpare).length} note="Long-lead parts for risk-significant equipment" tone="red" icon={Star} />
-            <Stat label="Inventory value" value={money(data.reduce((s, p) => s + p.onHand * p.unitCostCents, 0))} tone="blue" />
-          </div>
+          <StatGrid className="mb-8 grid-cols-2 lg:grid-cols-4">
+            <Stat label="Stock items" value={data.length} note={`${data.filter((p) => p.quality === 'Q').length} Q-level`} />
+            <Stat label="Below reorder point" value={data.filter((p) => p.belowReorder).length} note="Available = on hand − reserved" tone="accent" />
+            <Stat label="Critical spares low" value={data.filter((p) => p.belowReorder && p.criticalSpare).length} note="Long-lead parts for risk-significant equipment" tone="bad" />
+            <Stat label="Inventory value" value={money(data.reduce((s, p) => s + p.onHand * p.unitCostCents, 0))} />
+          </StatGrid>
           <div className="mb-4 flex flex-wrap gap-2">
             <Segmented value={filter} onChange={setFilter} options={[{ value: 'all', label: 'All stock' }, { value: 'reorder', label: 'Below reorder point' }, { value: 'Q', label: 'Q-level only' }]} />
             <div className="relative min-w-56 flex-1">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input className={cx(inputClass, 'pl-9')} placeholder="Search stock code or description" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
           <Card bodyClassName="overflow-x-auto">
-            <table className="w-full min-w-[1000px] text-sm">
+            <table className="table-pin w-full min-w-[1000px] text-sm">
               <thead>
-                <tr className="border-b border-line text-left text-xs font-semibold uppercase tracking-wide text-faint">
+                <tr className="border-b border-rule text-left text-xs font-medium text-muted">
                   <th className="px-5 py-3">Item</th>
                   <th className="px-3 py-3">Quality</th>
                   <th className="px-3 py-3">Bin</th>
@@ -72,14 +72,14 @@ export function PartsPage() {
               </thead>
               <tbody>
                 {rows.map((p) => (
-                  <tr key={p.id} className={cx('border-b border-line/60 last:border-0', p.belowReorder && 'bg-amber-50/40')}>
+                  <tr key={p.id} className={cx('border-b border-rule last:border-0', p.belowReorder && 'bg-accent-soft')}>
                     <td className="max-w-xs px-5 py-3">
-                      <div className="flex items-center gap-2 font-mono text-xs font-semibold">
+                      <div className="flex items-center gap-2 font-mono text-xs font-medium">
                         {p.stockCode}
                         {p.criticalSpare && <Badge tone="red"><Star size={10} /> Critical spare</Badge>}
                       </div>
                       <div className="truncate">{p.description}</div>
-                      <div className="text-xs text-faint">{p.mfrPart} · {money(p.unitCostCents)}</div>
+                      <div className="text-xs text-muted">{p.mfrPart} · {money(p.unitCostCents)}</div>
                     </td>
                     <td className="px-3 py-3">
                       <Badge tone={p.quality === 'Q' ? 'purple' : 'gray'}>{p.quality === 'Q' ? 'Q-level' : 'Commercial'}</Badge>
@@ -87,9 +87,9 @@ export function PartsPage() {
                     <td className="whitespace-nowrap px-3 py-3 font-mono text-xs text-muted">{p.bin}</td>
                     <td className="px-3 py-3 text-right tabular">{p.onHand}</td>
                     <td className="px-3 py-3 text-right tabular text-muted">{p.reserved}</td>
-                    <td className="px-3 py-3 text-right tabular font-semibold">
+                    <td className="px-3 py-3 text-right tabular font-medium">
                       <span className="inline-flex items-center gap-1">
-                        {p.belowReorder && <AlertTriangle size={13} className="text-warning" aria-label="Below reorder point" />}
+                        {p.belowReorder && <AlertTriangle size={13} className="text-accent" aria-label="Below reorder point" />}
                         {p.onHand - p.reserved}
                       </span>
                     </td>

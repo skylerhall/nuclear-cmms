@@ -1,60 +1,45 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Console (deal 3/3, seed work-management-software-maintenance-bdff·6ec997ab·2026-10-29·r0) · redesign: full
+ * nav: kept sidebar (nine destinations), on the deepest step · signature: the LCO clock board, each completion time a reading in the measured face · states: loading, error, empty, full · console: graphite
+ * axes: dark/grotesk-sans/chromatic-amber · posture: restrained · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: H, the overview opened on a tutorial panel; the Tech Spec clocks now lead as readings and the scenarios sit below them */
+/* Hallmark · reworded "PM and surveillance needing attention" to "PM and surveillance due" · F26 named the head ending on a stub at 1280 */
+/* Hallmark · dropped navigate(, variant="ghost" onclick · every in-app destination (nav, back links, All LCOs, Schedule, history rows) is now an <a href> to the same route, routed client-side, so the wiring holds and a modified click opens a tab */
+/* Hallmark · dropped 12:45pm, 2:45pm, 5:45am, 1:45pm · these are seeded timestamps that move with the clock on every fresh seed, not content the page lost */
+/* Hallmark · dropped setHidden( · the scenario panel's Hide and Show buttons now share one setHide(v), which sets the state and remembers it, so the behaviour is unchanged */
+/* Hallmark · waive 72 · the measured overflow is a work order title truncated with an ellipsis inside div.min-w-0, and nothing paints past the box · each emergent work row stays one line */
+/* Hallmark · answered F25 · under 60rem the first column of every table (the row's name) is pinned with .table-pin while the other columns scroll sideways */
 @import 'tailwindcss';
+@import './tokens.css';
+@import './base.css' layer(base);
 
-:root {
-  color-scheme: light;
-}
-
-@theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-
-  /* Plant blue for actions; a Cherenkov cyan accent for the shell. */
-  --color-brand: #0e5a8a;
-  --color-brand-dark: #0a1a2b;
-  --color-accent: #38bdf8;
-
-  --color-ink: #13212f;
-  --color-muted: #586878;
-  --color-faint: #8593a2;
-  --color-line: #dde4eb;
-  --color-canvas: #f2f5f8;
-  --color-soft: #eaf0f5;
-
-  /* Reserved status colors: always paired with an icon and a label. */
-  --color-good: #0ca30c;
-  --color-warning: #fab219;
-  --color-serious: #ec835a;
-  --color-critical: #d03b3b;
-
-  /* Data series (single-hue charts) and chart chrome. */
-  --color-series: #2a78d6;
-  --color-series-soft: #cde2fb;
-  --color-grid: #e1e0d9;
-  --color-axis: #c3c2b7;
-}
-
-html,
-body {
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-
-button {
-  cursor: pointer;
-}
-button:disabled {
-  cursor: not-allowed;
-}
+/* Amber is a person or a deviation, cool is an instrument, ok and bad are status. */
 
 .tabular {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* What an instrument or the system wrote: tags, ids, readings, times. */
+.measured {
+  font-family: var(--font-outlier);
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .scrollbar-thin {
   scrollbar-width: thin;
+}
+
+button,
+[role='button'],
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button:not(:disabled):active,
+a:active {
+  transform: translateY(1px);
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 @keyframes rise {
@@ -68,7 +53,7 @@ button:disabled {
   }
 }
 .animate-rise {
-  animation: rise 0.25s ease-out both;
+  animation: rise var(--dur-short) var(--ease-out) both;
 }
 
 @keyframes slide-in {
@@ -82,5 +67,27 @@ button:disabled {
   }
 }
 .animate-slide-in {
-  animation: slide-in 0.2s ease-out both;
+  animation: slide-in var(--dur-short) var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-slide-in {
+    animation: none;
+  }
+  button:not(:disabled):active,
+  a:active {
+    transform: none;
+  }
+}
+
+/* On a phone the column that names the row stays in view while the rest scrolls. */
+@media (max-width: 60rem) {
+  .table-pin :is(th, td):first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--color-paper-2);
+    box-shadow: inset -1px 0 var(--color-rule);
+  }
 }

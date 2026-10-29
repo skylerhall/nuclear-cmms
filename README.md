@@ -117,7 +117,7 @@ Stack: Node.js (TypeScript run natively, no server build step), Express, SQLite 
 
 ### Design skill
 
-[Hallmark](https://github.com/nutlope/hallmark) (MIT, by Together AI) is vendored in `.claude/skills/hallmark/`, pinned to upstream commit `4f6a46c`. Claude Code loads it automatically in this project. It only touches the existing dashboard when named: `/hallmark audit web/src` reports, `/hallmark redesign <path>` rebuilds. Its linter also runs on its own:
+[Hallmark](https://github.com/nutlope/hallmark) (MIT, by Together AI) is vendored in `.claude/skills/hallmark/`, pinned to upstream commit `4f6a46c`. Claude Code loads it automatically in this project. The dashboard was redesigned with it in Hallmark's Console theme: graphite panels, Host Grotesk for reading and Atkinson Hyperlegible Mono for anything measured (tags, readings, times), with amber marking a person or a deviation and blue an instrument. The stamp at the top of `web/src/styles.css` records every decision. It only touches the existing dashboard when named: `/hallmark audit web/src` reports, `/hallmark redesign <path>` rebuilds. Its linter also runs on its own:
 
 ```bash
 node .claude/skills/hallmark/scripts/sloplint.mjs web --scope app

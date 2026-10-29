@@ -35,19 +35,19 @@ export function ActivityPage() {
       {!data ? (
         <Spinner />
       ) : (
-        <Card bodyClassName="divide-y divide-line/70">
+        <Card bodyClassName="divide-y divide-rule">
           {data.rows.map((a) => (
             <div key={a.id} className="grid gap-1 px-5 py-3 text-sm md:grid-cols-[10rem_1fr_auto] md:items-start md:gap-4">
-              <span className="text-xs text-faint tabular">{dateTime(a.at)}</span>
-              <span className={cx(a.action.startsWith('lco.') && 'font-medium', a.action === 'wo.step_fail' && 'text-red-700')}>
-                <span className="font-semibold">{a.actorName}</span> · {a.summary}
+              <span className="text-xs text-muted tabular">{dateTime(a.at)}</span>
+              <span className={cx(a.action.startsWith('lco.') && 'font-medium', a.action === 'wo.step_fail' && 'text-bad')}>
+                <span className="font-medium">{a.actorName}</span> · {a.summary}
               </span>
               {a.entityType === 'work_order' && a.entityId ? (
-                <button className="text-xs font-medium text-brand hover:underline" onClick={() => navigate(`/work-orders/${a.entityId}`)}>
+                <button className="text-xs font-medium text-ink hover:underline" onClick={() => navigate(`/work-orders/${a.entityId}`)}>
                   Open
                 </button>
               ) : a.entityType === 'equipment' && a.entityId ? (
-                <button className="text-xs font-medium text-brand hover:underline" onClick={() => navigate(`/equipment/${a.entityId}`)}>
+                <button className="text-xs font-medium text-ink hover:underline" onClick={() => navigate(`/equipment/${a.entityId}`)}>
                   Open
                 </button>
               ) : (
@@ -62,7 +62,7 @@ export function ActivityPage() {
           )}
           <div className="flex items-center justify-between px-5 py-3 text-xs text-muted">
             <span>
-              {data.total ? offset + 1 : 0}–{Math.min(offset + PAGE, data.total)} of {data.total}
+              {data.total ? offset + 1 : 0} to {Math.min(offset + PAGE, data.total)} of {data.total}
             </span>
             <span className="flex gap-2">
               <Button size="sm" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - PAGE))}>

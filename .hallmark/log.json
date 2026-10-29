@@ -1,0 +1,30 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "console",
+  "axes": "dark/grotesk-sans/chromatic-amber",
+  "hero": "none (app scope)",
+  "nav": "kept sidebar, deepest step",
+  "footer": "none (app)",
+  "imagery": "product only, no photographs",
+  "photos": [],
+  "entry": "web/src/styles.css",
+  "fingerprint": "console-graphite-lco-board",
+  "sections": [
+   "LCO clock board with availability panel",
+   "stat surface",
+   "guided scenarios panel",
+   "emergent and due lists",
+   "backlog and throughput charts"
+  ],
+  "signature": "the Tech Spec LCO clock board, each completion time a reading in the measured face",
+  "waived": [
+   "72"
+  ],
+  "prompt": "work management software for maintenance crews and work control at a nuclear power plant",
+  "date": "2026-10-29"
+ }
+]

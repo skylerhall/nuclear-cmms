@@ -71,13 +71,13 @@ export function NewRequestModal({ open, onClose, equipmentId }: { open: boolean;
       <div className="space-y-4">
         <Field label="Equipment">
           {chosen ? (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-soft/50 px-3 py-2.5">
+            <div className="flex items-center justify-between gap-3 rounded-card border border-rule bg-paper-3 px-3 py-2.5">
               <div className="min-w-0">
                 <Tag>{chosen.tag}</Tag>
                 <div className="truncate text-sm text-muted">{chosen.name}</div>
               </div>
               {!equipmentId && (
-                <button type="button" className="text-sm font-medium text-brand hover:underline" onClick={() => setSelected(null)}>
+                <button type="button" className="text-sm font-medium text-ink hover:underline" onClick={() => setSelected(null)}>
                   Change
                 </button>
               )}
@@ -85,12 +85,12 @@ export function NewRequestModal({ open, onClose, equipmentId }: { open: boolean;
           ) : (
             <div>
               <div className="relative">
-                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                 <input autoFocus className={cx(inputClass, 'pl-9')} placeholder="Search tag or name, e.g. CCW-P or diesel" value={query} onChange={(e) => setQuery(e.target.value)} />
               </div>
-              <div className="mt-2 max-h-64 overflow-y-auto rounded-xl border border-line">
+              <div className="mt-2 max-h-64 overflow-y-auto rounded-card border border-rule">
                 {matches.map((e) => (
-                  <button key={e.id} type="button" onClick={() => setSelected(e.id)} className="flex w-full items-center justify-between gap-3 border-b border-line/60 px-3 py-2 text-left last:border-0 hover:bg-soft">
+                  <button key={e.id} type="button" onClick={() => setSelected(e.id)} className="flex w-full items-center justify-between gap-3 border-b border-rule px-3 py-2 text-left last:border-0 hover:bg-paper-3">
                     <span className="min-w-0">
                       <Tag>{e.tag}</Tag>
                       <span className="block truncate text-xs text-muted">{e.name}</span>
@@ -106,7 +106,7 @@ export function NewRequestModal({ open, onClose, equipmentId }: { open: boolean;
             </div>
           )}
         </Field>
-        <Field label="What's wrong">
+        <Field label="What’s wrong">
           <input className={inputClass} placeholder="e.g. Oil weeping at outboard bearing housing" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
         </Field>
         <Field label="Details" hint="Where, how much, and anything operations already did.">
