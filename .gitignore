@@ -10,5 +10,7 @@ data/
 .DS_Store
 npm-debug.log*
 coverage/
-.claude/
+# Local Claude Code state stays out; shared project skills are committed.
+.claude/*
+!.claude/skills/
 notes/

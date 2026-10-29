@@ -110,9 +110,18 @@ server/
 shared/rules.ts          roles, transitions, SR 3.0.2 math and labels, used by server and dashboard
 web/src/                 React dashboard (Vite + Tailwind)
 tests/                   node:test suites
+.claude/skills/hallmark/ Hallmark design skill for Claude Code (vendored, MIT)
 ```
 
 Stack: Node.js (TypeScript run natively, no server build step), Express, SQLite (`node:sqlite`), React, Tailwind. Charts are hand-built SVG.
+
+### Design skill
+
+[Hallmark](https://github.com/nutlope/hallmark) (MIT, by Together AI) is vendored in `.claude/skills/hallmark/`, pinned to upstream commit `4f6a46c`. Claude Code loads it automatically in this project. It only touches the existing dashboard when named: `/hallmark audit web/src` reports, `/hallmark redesign <path>` rebuilds. Its linter also runs on its own:
+
+```bash
+node .claude/skills/hallmark/scripts/sloplint.mjs web --scope app
+```
 
 ## Demo-grade vs production
 
