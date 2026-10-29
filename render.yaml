@@ -1,0 +1,15 @@
+# Render Blueprint: New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: nuclear-cmms
+    runtime: docker
+    # Free: sleeps after 15 idle minutes (about a minute to wake), and the demo
+    # data resets to the original fictional plant on every wake-up or deploy.
+    plan: free
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: SESSION_SECRET
+        generateValue: true
+      # Open to anyone by default so reviewers can try it. To lock it, add
+      # DEMO_PASSWORD in the service's Environment tab.

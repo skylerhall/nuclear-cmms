@@ -88,7 +88,7 @@ The 13 tests cover the lifecycle end to end, LCO entry and exit, the protected-t
 
 The app is one Docker container (API, hourly PM generator and dashboard) with a single SQLite file. On any Docker host, build the `Dockerfile` at the repository root, set `DEMO_PASSWORD`, and mount a volume at `/app/data` if you want changes to survive restarts. The app listens on `$PORT` (default 4200) and exposes `GET /healthz`.
 
-On Render: **New → Web Service**, pick this repository, choose the **Docker** runtime, and add a `DEMO_PASSWORD` environment variable. Without a disk the demo re-seeds on every restart, which is fine for a portfolio piece.
+On Render: **New → Blueprint**, pick this repository, and Render reads [`render.yaml`](render.yaml). It uses the free plan, which sleeps after 15 idle minutes and re-seeds the fictional plant on every wake-up, which is fine for a portfolio piece. The demo is open by default; add `DEMO_PASSWORD` in the service's Environment tab to lock it.
 
 | Variable | Default | Purpose |
 |---|---|---|
